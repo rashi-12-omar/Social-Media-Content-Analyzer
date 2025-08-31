@@ -753,104 +753,62 @@ class SocialMediaContentAnalyzer {
         this.showToast('Sentiment analysis complete', 'success');
     }
 
-    async analyzeSentiment(text) {
-    const sentimentData = await this.analyzeSentimentWithGemini(text);
-    this.currentSentimentData = sentimentData;
-    
-    this.updateSentimentDisplay(sentimentData);
-    this.updateEmotionChart(sentimentData.emotions);
-    this.updateSentimentTimeline(text, sentimentData.sentiment);
-    this.displayKeyPhrases(text, sentimentData);
-    this.generateSentimentRecommendations(sentimentData);
+    analyzeSentiment(text) {
+        // Mock sentiment analysis - in a real app, this would call an AI service
+        const sentimentData = this.mockSentimentAnalysis(text);
+        this.currentSentimentData = sentimentData;
+        
+        this.updateSentimentDisplay(sentimentData);
+        this.updateEmotionChart(sentimentData.emotions);
+        this.updateSentimentTimeline(text, sentimentData.sentiment);
+        this.displayKeyPhrases(text, sentimentData);
+        this.generateSentimentRecommendations(sentimentData);
     }
 
-    async analyzeSentimentWithGemini(text) {
-    try {
-        const response = await fetch('AIzaSyC8uc3tiYWWbbwX_1uRK76c879o1lC0Hxo', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                // Add auth headers if required by Gemini API, e.g.:
-                // 'Authorization': 'Bearer YOUR_API_KEY',
-            },
-            body: JSON.stringify({ text })
+    mockSentimentAnalysis(text) {
+        const words = text.toLowerCase().split(/\s+/);
+        
+        // Calculate basic sentiment
+        let sentiment = 0;
+        let positiveCount = 0;
+        let negativeCount = 0;
+        
+        words.forEach(word => {
+            if (this.positiveKeywords.includes(word)) {
+                sentiment += 0.3;
+                positiveCount++;
+            }
+            if (this.negativeKeywords.includes(word)) {
+                sentiment -= 0.3;
+                negativeCount++;
+            }
         });
-
-        if (!response.ok) {
-            throw new Error(`API error: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        // Expected Gemini response data structure:
-        // { sentiment: number (-1 to 1), confidence: number (0-100), emotions: {...} }
-        return {
-            sentiment: data.sentiment,
-            confidence: data.confidence,
-            emotions: data.emotions,
-            wordCount: text.split(/\s+/).length,
-            positiveWords: 0,
-            negativeWords: 0
-        };
-    } catch (error) {
-        console.error('Gemini API sentiment error:', error);
-        // Fallback neutral sentiment data
-        return {
-            sentiment: 0,
-            confidence: 0,
-            emotions: { joy: 0, anger: 0, fear: 0, sadness: 0, surprise: 0, disgust: 0 },
-            wordCount: text.split(/\s+/).length,
-            positiveWords: 0,
-            negativeWords: 0
-        };
-    }
-}
-
-
-    // mockSentimentAnalysis(text) {
-    //     const words = text.toLowerCase().split(/\s+/);
-        
-    //     // Calculate basic sentiment
-    //     let sentiment = 0;
-    //     let positiveCount = 0;
-    //     let negativeCount = 0;
-        
-    //     words.forEach(word => {
-    //         if (this.positiveKeywords.includes(word)) {
-    //             sentiment += 0.3;
-    //             positiveCount++;
-    //         }
-    //         if (this.negativeKeywords.includes(word)) {
-    //             sentiment -= 0.3;
-    //             negativeCount++;
-    //         }
-    //     });
         
         // Normalize sentiment
-    //     sentiment = Math.max(-1, Math.min(1, sentiment));
+        sentiment = Math.max(-1, Math.min(1, sentiment));
         
-    //     // Mock emotion scores
-    //     const emotions = {
-    //         joy: Math.max(0, sentiment * 80 + Math.random() * 20),
-    //         anger: Math.max(0, -sentiment * 60 + Math.random() * 20),
-    //         fear: Math.random() * 30 + (sentiment < -0.3 ? 20 : 0),
-    //         sadness: Math.max(0, -sentiment * 70 + Math.random() * 15),
-    //         surprise: Math.random() * 40,
-    //         disgust: Math.max(0, -sentiment * 40 + Math.random() * 10)
-    //     };
+        // Mock emotion scores
+        const emotions = {
+            joy: Math.max(0, sentiment * 80 + Math.random() * 20),
+            anger: Math.max(0, -sentiment * 60 + Math.random() * 20),
+            fear: Math.random() * 30 + (sentiment < -0.3 ? 20 : 0),
+            sadness: Math.max(0, -sentiment * 70 + Math.random() * 15),
+            surprise: Math.random() * 40,
+            disgust: Math.max(0, -sentiment * 40 + Math.random() * 10)
+        };
         
-    //     // Calculate confidence
-    //     const confidence = Math.min(95, 60 + (positiveCount + negativeCount) * 5);
+        // Calculate confidence
+        const confidence = Math.min(95, 60 + (positiveCount + negativeCount) * 5);
         
-    //     return {
-    //         sentiment,
-    //         confidence,
-    //         emotions,
-    //         wordCount: words.length,
-    //         positiveWords: positiveCount,
-    //         negativeWords: negativeCount
-    //     };
-    // }
+        return {
+            sentiment,
+            confidence,
+            emotions,
+            wordCount: words.length,
+            positiveWords: positiveCount,
+            negativeWords: negativeCount
+        };
+    }
 
     updateSentimentDisplay(data) {
         const sentimentLabel = document.getElementById('sentimentLabel');
