@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Media Content Analyzer</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app" id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="container">
+                <div class="flex items-center justify-between">
+                    <div class="header-title">
+                        <h1>Social Media Content Analyzer</h1>
+                        <p class="header-subtitle">Extract text from documents and analyze social media content</p>
+                    </div>
+                    <button class="theme-toggle btn btn--outline" id="themeToggle" aria-label="Toggle theme">
+                        <span class="theme-icon" id="themeIcon">🌙</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="container">
+                <!-- Document Text Extraction Section -->
+                <section class="section upload-section">
+                    <div class="section-header">
+                        <h2>📄 Document Text Extraction</h2>
+                        <p class="section-description">Extract text from PDFs and images using advanced OCR technology</p>
+                    </div>
+                    
+                    <div class="card upload-card">
+                        <div class="card__body">
+                            <div class="upload-area" id="uploadArea">
+                                <div class="upload-content">
+                                    <div class="upload-icon">📁</div>
+                                    <h3>Upload Your Documents</h3>
+                                    <p class="upload-description">
+                                        Drag and drop PDF or image files here, or click to browse
+                                    </p>
+                                    <p class="upload-formats">
+                                        Supported: PDF, JPG, PNG, GIF, BMP, TIFF (Max 10MB)
+                                    </p>
+                                    <button class="btn btn--primary" id="browseBtn">
+                                        Browse Files
+                                    </button>
+                                    <input type="file" id="fileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.tiff" hidden>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Processing Section -->
+                    <div class="processing-section hidden" id="processingSection">
+                        <div class="card">
+                            <div class="card__body">
+                                <div class="processing-content">
+                                    <div class="loading-spinner" id="loadingSpinner">
+                                        <div class="spinner"></div>
+                                    </div>
+                                    <h3 id="processingTitle">Processing Files...</h3>
+                                    <p id="processingDescription">Please wait while we extract text from your files.</p>
+                                    <div class="progress-bar" id="progressBar">
+                                        <div class="progress-fill" id="progressFill"></div>
+                                    </div>
+                                    <p class="progress-text" id="progressText">0%</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Extraction Results -->
+                    <div class="results-section hidden" id="resultsSection">
+                        <div class="card">
+                            <div class="card__header">
+                                <div class="flex items-center justify-between">
+                                    <h3>Extracted Text</h3>
+                                    <div class="result-actions">
+                                        <button class="btn btn--secondary btn--sm" id="copyBtn">
+                                            Copy Text
+                                        </button>
+                                        <button class="btn btn--outline btn--sm" id="downloadBtn">
+                                            Download
+                                        </button>
+                                        <button class="btn btn--outline btn--sm" id="clearBtn">
+                                            Clear All
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card__body">
+                                <div class="results-container">
+                                    <div id="extractedText" class="extracted-text"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Error Section -->
+                    <div class="error-section hidden" id="errorSection">
+                        <div class="card error-card">
+                            <div class="card__body">
+                                <div class="error-content">
+                                    <div class="error-icon">⚠️</div>
+                                    <h3>Error Processing Files</h3>
+                                    <p id="errorMessage">An error occurred while processing your files.</p>
+                                    <button class="btn btn--primary" id="retryBtn">
+                                        Try Again
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Social Media Post Analyzer Section -->
+                <section class="section post-analyzer-section">
+                    <div class="section-header">
+                        <h2>📱 Social Media Content Analyzer</h2>
+                        <p class="section-description">Optimize your social media content for maximum engagement</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="card__body">
+                            <div class="post-analyzer">
+                                <div class="platform-selector">
+                                    <label class="form-label">Select Platform</label>
+                                    <select id="platformSelect" class="form-control">
+                                        <option value="instagram">Instagram</option>
+                                        <option value="twitter">Twitter</option>
+                                        <option value="linkedin">LinkedIn</option>
+                                        <option value="facebook">Facebook</option>
+                                    </select>
+                                </div>
+
+                                <div class="content-input">
+                                    <label class="form-label">Social Media Content</label>
+                                    <textarea id="postContent" class="form-control post-textarea" 
+                                              placeholder="Write your social media post here..." rows="6"></textarea>
+                                    <div class="content-stats">
+                                        <div class="stat">
+                                            <span class="stat-label">Characters:</span>
+                                            <span id="charCount" class="stat-value">0</span>
+                                            <span id="charLimit" class="stat-limit">/ 2200</span>
+                                        </div>
+                                        <div class="stat">
+                                            <span class="stat-label">Hashtags:</span>
+                                            <span id="hashtagCount" class="stat-value">0</span>
+                                            <span id="hashtagOptimal" class="stat-optimal">Optimal: 8-12</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="post-score-card">
+                                    <h4>Content Score</h4>
+                                    <div class="score-display">
+                                        <div class="score-circle" id="postScore">
+                                            <span class="score-value" id="scoreValue">0</span>
+                                            <span class="score-max">/100</span>
+                                        </div>
+                                        <div class="score-breakdown">
+                                            <div class="score-item">
+                                                <span class="score-label">Length</span>
+                                                <div class="score-bar">
+                                                    <div class="score-fill" id="lengthScore"></div>
+                                                </div>
+                                            </div>
+                                            <div class="score-item">
+                                                <span class="score-label">Engagement</span>
+                                                <div class="score-bar">
+                                                    <div class="score-fill" id="engagementScore"></div>
+                                                </div>
+                                            </div>
+                                            <div class="score-item">
+                                                <span class="score-label">Hashtags</span>
+                                                <div class="score-bar">
+                                                    <div class="score-fill" id="hashtagScore"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="quick-actions">
+                                    <button class="btn btn--outline btn--sm" id="useExtractedText">
+                                        Use Extracted Text
+                                    </button>
+                                    <button class="btn btn--outline btn--sm" id="clearPost">
+                                        Clear Content
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Sentiment Analysis Section -->
+                <section class="section sentiment-section">
+                    <div class="section-header">
+                        <h2>🎭 Sentiment Analysis</h2>
+                        <p class="section-description">Analyze emotional tone and sentiment of your content</p>
+                    </div>
+
+                    <div class="sentiment-grid">
+                        <!-- Text Input -->
+                        <div class="card sentiment-input-card">
+                            <div class="card__header">
+                                <h4>Text Analysis</h4>
+                            </div>
+                            <div class="card__body">
+                                <div class="sentiment-input-options">
+                                    <button class="btn btn--outline btn--sm" id="analyzeSocialPost">
+                                        Analyze Social Post
+                                    </button>
+                                    <button class="btn btn--outline btn--sm" id="analyzeExtracted">
+                                        Analyze Extracted Text
+                                    </button>
+                                </div>
+                                <textarea id="sentimentText" class="form-control sentiment-textarea" 
+                                          placeholder="Enter text for sentiment analysis..." rows="6"></textarea>
+                                <button class="btn btn--primary btn--full-width" id="analyzeSentiment">
+                                    Analyze Sentiment
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Sentiment Gauge -->
+                        <div class="card sentiment-gauge-card">
+                            <div class="card__header">
+                                <h4>Overall Sentiment</h4>
+                            </div>
+                            <div class="card__body">
+                                <div class="sentiment-gauge-container" style="position: relative; height: 300px;">
+                                    <canvas id="sentimentGauge"></canvas>
+                                </div>
+                                <div class="sentiment-summary">
+                                    <div class="sentiment-score">
+                                        <span class="sentiment-label" id="sentimentLabel">Neutral</span>
+                                        <span class="sentiment-value" id="sentimentValue">0.0</span>
+                                    </div>
+                                    <div class="confidence-score">
+                                        <span class="confidence-label">Confidence:</span>
+                                        <span class="confidence-value" id="confidenceValue">0%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Emotion Breakdown -->
+                        <div class="card emotion-breakdown-card">
+                            <div class="card__header">
+                                <h4>Emotion Analysis</h4>
+                            </div>
+                            <div class="card__body">
+                                <div class="emotion-chart-container" style="position: relative; height: 300px;">
+                                    <canvas id="emotionChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Key Phrases -->
+                        <div class="card key-phrases-card">
+                            <div class="card__header">
+                                <h4>Key Emotional Phrases</h4>
+                            </div>
+                            <div class="card__body">
+                                <div id="keyPhrases" class="key-phrases-container">
+                                    <p class="no-analysis">Run sentiment analysis to see key phrases</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sentiment Timeline -->
+                        <div class="card sentiment-timeline-card">
+                            <div class="card__header">
+                                <h4>Sentiment Timeline</h4>
+                            </div>
+                            <div class="card__body">
+                                <div class="timeline-chart-container" style="position: relative; height: 200px;">
+                                    <canvas id="sentimentTimeline"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recommendations -->
+                        <div class="card sentiment-recommendations-card">
+                            <div class="card__header">
+                                <h4>Tone Recommendations</h4>
+                            </div>
+                            <div class="card__body">
+                                <div id="sentimentRecommendations" class="recommendations-list">
+                                    <p class="no-analysis">Analyze text to get personalized recommendations</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- AI Suggestions Section -->
+                <section class="section ai-suggestions-section">
+                    <div class="section-header">
+                        <h2>🤖 Suggestions</h2>
+                        <p class="section-description">Get smart recommendations to improve your content</p>
+                    </div>
+
+                    <div class="suggestions-grid" id="suggestionsGrid">
+                        <!-- AI suggestions will be dynamically populated -->
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <p>&copy; Made by Rashi Omar.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
